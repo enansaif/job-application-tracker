@@ -1,0 +1,9 @@
+services:
+  app:
+    build: .
+    container_name: jat-app
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./app:/app
+    ports:
+      - "8000:8000"
