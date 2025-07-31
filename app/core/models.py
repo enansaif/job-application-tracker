@@ -1,3 +1,4 @@
+from uuid import uuid4
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
@@ -33,6 +34,7 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+    public_id = models.UUIDField(default=uuid4, unique=True, editable=False)
     email = models.EmailField(max_length=255, unique=True, validators=[validate_email])
     name = models.CharField(max_length=255, null=True)
     is_active = models.BooleanField(default=True)
