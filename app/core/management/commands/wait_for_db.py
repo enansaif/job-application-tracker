@@ -11,11 +11,11 @@ class Command(BaseCommand):
         while max_attempt > 0:
             try:
                 connection = connections['default']
-                connection.cursor() # make connection attempt
+                connection.cursor()  # make connection attempt
                 self.stdout.write('Database initialized.')
                 return
             except OperationalError:
-                self.stdout.write('Waiting 1 second for database to initialize...')
+                self.stdout.write('Waiting for database to initialize...')
                 max_attempt -= 1
                 time.sleep(1)
         self.stdout.write('Could not initialize database')

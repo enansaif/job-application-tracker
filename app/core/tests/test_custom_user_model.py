@@ -3,6 +3,7 @@ from django.test import TestCase
 
 User = get_user_model()
 
+
 class PublicTestCase(TestCase):
 
     def test_create_user_email_successful(self):

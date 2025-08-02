@@ -57,10 +57,11 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Country(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
+
     class Meta:
         constraints = [
-        models.UniqueConstraint(fields=['user', 'name'], name='unique_user_country')
-    ]
+            models.UniqueConstraint(fields=['user', 'name'], name='unique_user_country')
+        ]
 
     def __str__(self):
         return self.name
@@ -69,10 +70,11 @@ class Country(models.Model):
 class Tag(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
+
     class Meta:
         constraints = [
-        models.UniqueConstraint(fields=['user', 'name'], name='unique_user_tag')
-    ]
+            models.UniqueConstraint(fields=['user', 'name'], name='unique_user_tag')
+        ]
 
     def __str__(self):
         return self.name
@@ -84,10 +86,11 @@ class Company(models.Model):
     country = models.ForeignKey(Country, null=True, blank=True, on_delete=models.SET_NULL)
     link = models.URLField(null=True, blank=True)
     tags = models.ManyToManyField(Tag)
+
     class Meta:
         constraints = [
-        models.UniqueConstraint(fields=['user', 'name'], name='unique_user_company')
-    ]
+            models.UniqueConstraint(fields=['user', 'name'], name='unique_user_company')
+        ]
 
     def __str__(self):
         return self.name
@@ -130,4 +133,3 @@ class Interview(models.Model):
 
     def __str__(self):
         return f"{self.application.company.name} on {str(self.date)}"
-
