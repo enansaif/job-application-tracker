@@ -5,16 +5,22 @@ from core import models
 
 
 class TagSerializer(ModelSerializer):
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
 
     class Meta:
         model = models.Tag
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'user']
         read_only_fields = ['id']
+        validators = [
+            UniqueTogetherValidator(
+                queryset=models.Tag.objects.all(),
+                fields=['name', 'user'],
+                message='Names need to be unique for every user'
+            )
+        ]
 
-    def create(self, validated_data):
-        request = self.context.get('request')
-        tag, _ = models.Tag.objects.get_or_create(user=request.user, **validated_data)
-        return tag
 
 class CountrySerializer(ModelSerializer):
     user = serializers.HiddenField(
