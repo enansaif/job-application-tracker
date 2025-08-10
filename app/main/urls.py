@@ -3,5 +3,7 @@ from main import views
 
 urlpatterns = [
     path('tags/', views.TagListCreateView.as_view(), name='tags-list-create'),
-    path('tags/<id>/', views.TagUpdateDestroyView.as_view(), name='tags-update-destroy')
+    path('tags/<int:id>/', views.TagUpdateDestroyView.as_view(), name='tags-update-destroy'),
+    path('country/', views.CountryListCreateView.as_view(), name='country-list-create'),
+    path('country/<int:id>/', views.CountryUpdateDestroy.as_view(), name='country-update-destroy')
 ]
