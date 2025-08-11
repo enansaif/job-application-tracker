@@ -84,7 +84,22 @@ class CountryUpdateDestroy(APIView):
 
 
 class CompanyListView(APIView):
-    ...
+    serializer_class = CompanySerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        companies = Company.objects.filter(user=request.user)
+        serializer = CompanySerializer(many=True, instance=companies)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = CompanySerializer(data=request.data, context={'request':request})
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class CompanyDetailView(APIView):

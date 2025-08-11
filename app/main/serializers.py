@@ -46,12 +46,12 @@ class CompanySerializer(ModelSerializer):
         default=serializers.CurrentUserDefault()
     )
     country = serializers.PrimaryKeyRelatedField(
-        query_set=Country.objects.all(),
+        queryset=Country.objects.all(),
         required=False,
         write_only=True
     )
-    country_detail = CountrySerializer(query_set=Country.objects.all(), required=False)
-    tags = TagSerializer(many=True, query_set=Tag.objects.all(), required=False)
+    country_detail = CountrySerializer(read_only=True, required=False)
+    tags = TagSerializer(many=True, required=False)
     class Meta:
         model = Company
         fields = ['id', 'user', 'name', 'country', 'country_detail', 'link', 'tags']
