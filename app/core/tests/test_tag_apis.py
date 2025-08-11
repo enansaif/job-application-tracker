@@ -36,6 +36,7 @@ class PrivateTestCase(TestCase):
         response = self.client.post(URL, payload)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data.get('name'), payload['name'])
+        self.assertNotIn('user', response.data)
 
     def test_create_tag_unsuccessful(self):
         payload = {'name': ''}

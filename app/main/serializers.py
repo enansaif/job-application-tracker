@@ -66,12 +66,13 @@ class CompanySerializer(ModelSerializer):
 
     def _handle_tags(self, tags):
         obj_list = []
-        for tag_name in tags:
+        for tag in tags:
             request = self.context.get('request')
-            tag, _ = Tag.objects.get_or_create(name=tag_name, user=request.user)
-            obj_list.append(tag)
+            tag_obj, _ = Tag.objects.get_or_create(name=tag['name'], user=request.user)
+            obj_list.append(tag_obj)
         return obj_list
 
+    @transaction.atomic
     def create(self, validated_data):
         tags_data = validated_data.pop('tags', None)
         company = super().create(validated_data)
@@ -80,6 +81,7 @@ class CompanySerializer(ModelSerializer):
             company.tags.set(tags)
         return company
 
+    @transaction.atomic
     def update(self, instance, validated_data):
         tags_data = validated_data.pop('tags', None)
         company = super().update(instance, validated_data)
