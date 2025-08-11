@@ -1,5 +1,5 @@
 from rest_framework.views import APIView
-from main.serializers import TagSerializer, CountrySerializer
+from main.serializers import *
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -81,3 +81,11 @@ class CountryUpdateDestroy(APIView):
         country = get_object_or_404(Country, id=id, user=request.user)
         country.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CompanyListView(APIView):
+    ...
+
+
+class CompanyDetailView(APIView):
+    ...
