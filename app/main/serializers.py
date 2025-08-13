@@ -50,11 +50,18 @@ class CompanySerializer(ModelSerializer):
         required=False,
         write_only=True
     )
-    country_detail = CountrySerializer(read_only=True, required=False)
-    tags = TagSerializer(many=True, required=False)
+    country_detail = CountrySerializer(source='country', read_only=True, required=False)
+    tag_details = TagSerializer(source='tags', read_only=True, many=True)
+    tags = serializers.ListField(
+        child=serializers.CharField(max_length=255),
+        required=False,
+        allow_empty=True,
+        max_length=5,
+        write_only=True
+    )
     class Meta:
         model = Company
-        fields = ['id', 'user', 'name', 'country', 'country_detail', 'link', 'tags']
+        fields = ['id', 'user', 'name', 'country', 'country_detail', 'link', 'tags', 'tag_details']
         read_only_fields = ['id', 'country_detail']
         validators = [
             UniqueTogetherValidator(
@@ -68,7 +75,7 @@ class CompanySerializer(ModelSerializer):
         obj_list = []
         for tag in tags:
             request = self.context.get('request')
-            tag_obj, _ = Tag.objects.get_or_create(name=tag['name'], user=request.user)
+            tag_obj, _ = Tag.objects.get_or_create(name=tag, user=request.user)
             obj_list.append(tag_obj)
         return obj_list
 
