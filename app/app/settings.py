@@ -143,4 +143,9 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'Track job applications with submitted resume version.',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
 }
+
+MEDIA_URL = 'media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, MEDIA_URL)
+
