@@ -12,7 +12,8 @@ RUN apt-get update && \
     pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
     apt-get purge -y --auto-remove gcc build-essential && \
-    rm -rf /var/lib/apt/lists/* /root/.cache
+    rm -rf /var/lib/apt/lists/* /root/.cache && \
+    mkdir -p /app/media
 
 COPY app .
 
