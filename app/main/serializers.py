@@ -96,3 +96,16 @@ class CompanySerializer(ModelSerializer):
             tags = self._handle_tags(tags_data)
             company.tags.set(tags)
         return company
+
+
+class ResumeReadSerializer(ModelSerializer):
+    tags = TagSerializer(many=True)
+    class Meta:
+        model = Resume
+        fields = ['id', 'file', 'created_at', 'updated_at', 'tags']
+
+    def create(self, validated_data):
+        raise NotImplementedError("ResumeReadSerializer is read-only")
+
+    def update(self, instance, validated_data):
+        raise NotImplementedError("ResumeReadSerializer is read-only")
