@@ -109,3 +109,52 @@ class ResumeReadSerializer(ModelSerializer):
 
     def update(self, instance, validated_data):
         raise NotImplementedError("ResumeReadSerializer is read-only")
+
+
+class ResumeWriteSerializer(ModelSerializer):
+    tags = serializers.ListField(
+        child=serializers.CharField(max_length = 255),
+        max_length = 5,
+        write_only = True,
+        required = False,
+        allow_empty = True
+    )
+    class Meta:
+        model = Resume
+        fields = ['file', 'tags']
+
+    def _handle_tags(self, tags):
+        request = self.context.get('request')
+        if not request:
+            raise ValueError('Request must be passed in context')
+        objs = []
+        for tag in tags:
+            obj, _ = Tag.objects.get_or_create(user=request.user, name=tag)
+            objs.append(obj)
+        return objs
+
+    @transaction.atomic
+    def create(self, validated_data):
+        tags = validated_data.pop('tags', None)
+        request = self.context.get('request')
+        if not request:
+            raise ValueError('Request must be passed in context')
+        resume = Resume.objects.create(**validated_data, user=request.user)
+        if tags:
+            tag_objs = self._handle_tags(tags)
+            resume.tags.set(tag_objs)
+        return resume
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        tags = validated_data.pop('tags', None)
+        request = self.context.get('request')
+        if not request:
+            raise ValueError('Request must be passed in context')
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        if tags is not None:
+            tag_objs = self._handle_tags(tags)
+            instance.tags.set(tag_objs)
+        return instance
