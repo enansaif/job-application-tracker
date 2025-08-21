@@ -6,6 +6,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from core.models import Tag, Country
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema
+from rest_framework.parsers import MultiPartParser, FormParser
 
 
 class TagListCreateView(APIView):
@@ -124,3 +126,52 @@ class CompanyDetailView(APIView):
         company = get_object_or_404(Company, id=id, user=request.user)
         company.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ResumeDetailView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        responses=ResumeReadSerializer
+    )
+    def get(self, request, id):
+        resume = get_object_or_404(Resume, id=id, user=request.user)
+        serializer = ResumeReadSerializer(resume)
+        return Response(serializer.data)
+
+    @extend_schema(
+        request=ResumeWriteSerializer,
+        responses=ResumeReadSerializer
+    )
+    def patch(self, request, id):
+        resume = get_object_or_404(Resume, id=id, user=request.user)
+        serializer = ResumeWriteSerializer(instance=resume, data=request.data, partial=True)
+        if serializer.is_valid():
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ResumeListView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    @extend_schema(
+        responses=ResumeReadSerializer
+    )
+    def get(self, request):
+        resumes = Resume.objects.filter(user=request.user)
+        serializer = ResumeReadSerializer(resumes, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        request=ResumeWriteSerializer,
+        responses=ResumeReadSerializer
+    )
+    def post(self, request):
+        serializer = ResumeWriteSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            resume = serializer.save()
+            return Response(ResumeReadSerializer(resume).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

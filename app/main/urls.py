@@ -7,5 +7,7 @@ urlpatterns = [
     path('country/', views.CountryListCreateView.as_view(), name='country-list-create'),
     path('country/<int:id>/', views.CountryUpdateDestroy.as_view(), name='country-update-destroy'),
     path('company/', views.CompanyListView.as_view(), name='company-list-create'),
-    path('company/<int:id>', views.CompanyDetailView.as_view(), name='company-update-destroy')
+    path('company/<int:id>', views.CompanyDetailView.as_view(), name='company-update-destroy'),
+    path('resume/', views.ResumeListView.as_view(), name='resume-list-create'),
+    path('resume/<int:id>/', views.ResumeDetailView.as_view(), name='resume-update')
 ]
