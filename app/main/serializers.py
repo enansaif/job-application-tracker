@@ -158,3 +158,10 @@ class ResumeWriteSerializer(ModelSerializer):
             tag_objs = self._handle_tags(tags)
             instance.tags.set(tag_objs)
         return instance
+
+
+class ApplicationDetailReadSerializer(ModelSerializer):
+    class Meta:
+        model = Application
+        fields = ['company', 'country', 'tags', 'position', 'link', 'note', 'status', 'created_at', 'updated_at']
+
