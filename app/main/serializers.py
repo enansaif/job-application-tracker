@@ -174,7 +174,7 @@ class ApplicationSerializer(ModelSerializer):
     )
     tag_ids = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), source="tags", many=True,
-        required=False, write_only=True
+        required=False, write_only=True, allow_empty=True
     )
     resume_id = serializers.PrimaryKeyRelatedField(
         queryset=Resume.objects.all(), source="resume",
@@ -195,9 +195,9 @@ class ApplicationSerializer(ModelSerializer):
         request = self.context.get("request")
         if not request:
             raise ValueError("Request must be passed in context")
-        tags = validated_data.pop("tags", [])
+        tags = validated_data.pop("tags", None)
         application = Application.objects.create(**validated_data, user=request.user)
-        if tags:
+        if tags is not None:
             application.tags.set(tags)
         return application
 

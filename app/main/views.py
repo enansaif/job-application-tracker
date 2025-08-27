@@ -192,7 +192,7 @@ class ApplicationDetailView(APIView):
         serializer = ApplicationSerializer(data=request.data, instance=instance, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -202,8 +202,8 @@ class ApplicationCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        serializer = ApplicationSerializer(data=request.data)
+        serializer = ApplicationSerializer(data=request.data, context={'request':request})
         if serializer.is_valid():
             serializer.save()
-            return Response(status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

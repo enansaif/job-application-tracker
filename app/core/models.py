@@ -115,7 +115,7 @@ class Application(models.Model):
     resume = models.ForeignKey(Resume, null=True, blank=True, on_delete=models.SET_NULL)
     position = models.CharField(max_length=255)
     link = models.URLField(null=True, blank=True)
-    note = models.TextField()
+    note = models.TextField(null=True, blank=True)
     status = models.CharField(max_length=32, choices=APPLICATION_STATUS_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
