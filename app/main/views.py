@@ -175,3 +175,35 @@ class ResumeListView(APIView):
             resume = serializer.save()
             return Response(ResumeReadSerializer(resume).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ApplicationDetailView(APIView):
+    serializer_class = ApplicationSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, id):
+        instance = get_object_or_404(Application, id=id, user=request.user)
+        serializer = ApplicationSerializer(instance)
+        return Response(serializer.data)
+
+    def patch(self, request, id):
+        instance = get_object_or_404(Application, id=id, user=request.user)
+        serializer = ApplicationSerializer(data=request.data, instance=instance, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ApplicationCreateView(APIView):
+    serializer_class = ApplicationSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = ApplicationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

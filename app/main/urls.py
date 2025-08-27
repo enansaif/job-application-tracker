@@ -9,5 +9,7 @@ urlpatterns = [
     path('company/', views.CompanyListView.as_view(), name='company-list-create'),
     path('company/<int:id>', views.CompanyDetailView.as_view(), name='company-update-destroy'),
     path('resume/', views.ResumeListView.as_view(), name='resume-list-create'),
-    path('resume/<int:id>/', views.ResumeDetailView.as_view(), name='resume-update')
+    path('resume/<int:id>/', views.ResumeDetailView.as_view(), name='resume-update'),
+    path('application/', views.ApplicationCreateView.as_view(), name='app-create'),
+    path('application/<int:id>/', views.ApplicationDetailView.as_view(), name='app-detail'),
 ]

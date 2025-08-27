@@ -160,8 +160,18 @@ class ResumeWriteSerializer(ModelSerializer):
         return instance
 
 
-class ApplicationDetailReadSerializer(ModelSerializer):
+class ApplicationSerializer(ModelSerializer):
+    company = CompanySerializer(read_only=True)
+    country = CountrySerializer(read_only=True)
+    tags = TagSerializer(many=True, read_only=True)
     class Meta:
         model = Application
-        fields = ['company', 'country', 'tags', 'position', 'link', 'note', 'status', 'created_at', 'updated_at']
+        fields = ['id', 'company', 'country', 'tags', 'position', 'link', 'note', 'status', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']
 
+    def create(self, validated_data):
+        request = self.context.get('request')
+        if not request:
+            raise ValueError('Request must be passed in context')
+        application = Application.objects.create(**validated_data, user=request.user)
+        return application
