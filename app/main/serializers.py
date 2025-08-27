@@ -164,14 +164,46 @@ class ApplicationSerializer(ModelSerializer):
     company = CompanySerializer(read_only=True)
     country = CountrySerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
+
+    company_id = serializers.PrimaryKeyRelatedField(
+        queryset=Company.objects.all(), source="company", write_only=True
+    )
+    country_id = serializers.PrimaryKeyRelatedField(
+        queryset=Country.objects.all(), source="country",
+        required=False, allow_null=True, write_only=True
+    )
+    tag_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(), source="tags", many=True,
+        required=False, write_only=True
+    )
+    resume_id = serializers.PrimaryKeyRelatedField(
+        queryset=Resume.objects.all(), source="resume",
+        required=False, allow_null=True, write_only=True
+    )
+
     class Meta:
         model = Application
-        fields = ['id', 'company', 'country', 'tags', 'position', 'link', 'note', 'status', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        fields = [
+            "id", "company", "country", "tags",
+            "company_id", "country_id", "tag_ids", "resume_id",
+            "position", "link", "note", "status",
+            "created_at", "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
 
     def create(self, validated_data):
-        request = self.context.get('request')
+        request = self.context.get("request")
         if not request:
-            raise ValueError('Request must be passed in context')
+            raise ValueError("Request must be passed in context")
+        tags = validated_data.pop("tags", [])
         application = Application.objects.create(**validated_data, user=request.user)
+        if tags:
+            application.tags.set(tags)
         return application
+
+    def update(self, instance, validated_data):
+        tags = validated_data.pop("tags", None)
+        instance = super().update(instance, validated_data)
+        if tags is not None:
+            instance.tags.set(tags)
+        return instance
