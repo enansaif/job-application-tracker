@@ -109,6 +109,7 @@ class CompanyDetailView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(operation_id="company_detail")
     def get(self, request, id):
         company = get_object_or_404(Company, id=id, user=request.user)
         serializer = CompanySerializer(instance=company)
@@ -133,7 +134,8 @@ class ResumeDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
-        responses=ResumeReadSerializer
+        responses=ResumeReadSerializer,
+        operation_id="resume_detail"
     )
     def get(self, request, id):
         resume = get_object_or_404(Resume, id=id, user=request.user)
