@@ -102,7 +102,7 @@ class ResumeReadSerializer(ModelSerializer):
     tags = TagSerializer(many=True)
     class Meta:
         model = Resume
-        fields = ['id', 'file', 'created_at', 'updated_at', 'tags']
+        fields = ['id', 'created_at', 'updated_at', 'tags']
 
     def create(self, validated_data):
         raise NotImplementedError("ResumeReadSerializer is read-only")

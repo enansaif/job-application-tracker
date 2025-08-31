@@ -117,7 +117,7 @@ class PrivateResumeApiTests(TestCase):
         res = self.client.post(RESUME_LIST_URL, {'file': file}, format='multipart')
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertIn('id', res.data)
-        self.assertIn('file', res.data)
+        self.assertNotIn('file', res.data)
         self.assertEqual(res.data['tags'], [])
         self.assertEqual(Resume.objects.filter(user=self.user).count(), 1)
 
