@@ -133,6 +133,22 @@ class ResumeWriteSerializer(ModelSerializer):
             objs.append(obj)
         return objs
 
+    def validate_file(self, value):
+        if value.content_type != 'application/pdf':
+            raise serializers.ValidationError('Only PDF files are allowed.')
+        if not value.name.lower().endswith('.pdf'):
+            raise serializers.ValidationError('File is not a pdf.')
+        try:
+            value.seek(0)
+            file_header = value.read(4)
+        except Exception:
+            raise serializers.ValidationError("File couldn't be read")
+        finally:
+            value.seek(0)
+        if file_header != b'%PDF':
+            raise serializers.ValidationError('File is not a pdf!')
+        return value
+
     @transaction.atomic
     def create(self, validated_data):
         tags = validated_data.pop('tags', None)

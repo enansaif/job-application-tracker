@@ -25,6 +25,19 @@ def make_dummy_file(name="cv.pdf", content=b"%PDF-1.4\n%..."):
     # minimal PDF-like bytes; adjust as needed
     return SimpleUploadedFile(name=name, content=content, content_type="application/pdf")
 
+def make_non_pdf_file(name="looks_like.pdf", content=b"GIF89a-not-a-pdf"):
+    """
+    Create a file whose bytes are NOT a PDF (doesn't start with b'%PDF'),
+    even if the name/extension or content_type suggests it's a PDF.
+    """
+    return SimpleUploadedFile(name=name, content=content, content_type="application/pdf")
+
+def make_non_pdf_file_no_extension(name="resume", content=b"plain-bytes-not-a-pdf"):
+    """
+    Create a file with no extension and non-PDF bytes.
+    """
+    return SimpleUploadedFile(name=name, content=content, content_type="application/octet-stream")
+
 
 @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
 class PublicResumeApiTests(TestCase):
@@ -185,6 +198,28 @@ class PrivateResumeApiTests(TestCase):
         # Ensure my Tag was created under my user context, not reusing other's
         self.assertTrue(Tag.objects.filter(user=self.user, name='shared').exists())
         self.assertEqual(Tag.objects.filter(name='shared').count(), 2)
+
+    def test_create_resume_rejects_non_pdf_even_if_named_pdf(self):
+        """
+        Upload should fail when the file content isn't a real PDF, even if it has a .pdf
+        filename and 'application/pdf' content_type.
+        """
+        fake_pdf = make_non_pdf_file(name="fake.pdf")
+        res = self.client.post(RESUME_LIST_URL, data={'file': fake_pdf}, format='multipart')
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('file', res.data)
+        self.assertEqual(Resume.objects.filter(user=self.user).count(), 0)
+
+
+    def test_create_resume_rejects_non_pdf_without_extension(self):
+        """
+        Upload should fail when the file isn't a real PDF, even if it lacks an extension.
+        """
+        no_ext = make_non_pdf_file_no_extension(name="resume")
+        res = self.client.post(RESUME_LIST_URL, data={'file': no_ext}, format='multipart')
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('file', res.data)
+        self.assertEqual(Resume.objects.filter(user=self.user).count(), 0)
 
     # ------- PATCH (current behavior in your view) -------
 
