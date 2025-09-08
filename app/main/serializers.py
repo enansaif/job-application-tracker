@@ -223,3 +223,17 @@ class ApplicationSerializer(ModelSerializer):
         if tags is not None:
             instance.tags.set(tags)
         return instance
+
+class InterviewReadSerializer(serializers.ModelSerializer):
+    application = ApplicationSerializer()
+    tags = TagSerializer(many=True)
+
+    class Meta:
+        model = Interview
+        fields = ['application', 'tags', 'date', 'note']
+
+    def create(self, validated_data):
+        raise NotImplementedError('This class is read only')
+
+    def update(self, instance, validated_data):
+        raise NotImplementedError('This class is read only')
