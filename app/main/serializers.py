@@ -237,3 +237,29 @@ class InterviewReadSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         raise NotImplementedError('This class is read only')
+
+class InterviewWriteSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Interview
+        fields = ['user', 'application', 'tags', 'date', 'note']
+        read_only_fields = ['user']
+        extra_kwargs = {'tags': {'required': False}}
+
+    def create(self, validated_data):
+        try:
+            request = self.context["request"]
+        except KeyError:
+            raise KeyError('Request must be passed in')
+        tags = validated_data.pop('tags', None)
+        interview = Interview.objects.create(**validated_data, user=request.user)
+        if tags is not None:
+            interview.tags.set(tags)
+        return interview
+
+    def update(self, instance, validated_data):
+        tags = validated_data.pop('tags', None)
+        instance = super().update(instance, validated_data)
+        if tags is not None:
+            instance.tags.set(tags)
+        return instance
