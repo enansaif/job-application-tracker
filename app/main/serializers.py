@@ -239,27 +239,46 @@ class InterviewReadSerializer(serializers.ModelSerializer):
         raise NotImplementedError('This class is read only')
 
 class InterviewWriteSerializer(serializers.ModelSerializer):
+    tags = serializers.ListField(
+        child=serializers.CharField(max_length=255),
+        required=False,
+        allow_empty=True,
+        max_length=5,
+        write_only=True
+    )
 
     class Meta:
         model = Interview
         fields = ['user', 'application', 'tags', 'date', 'note']
         read_only_fields = ['user']
-        extra_kwargs = {'tags': {'required': False}}
 
+    def _handle_tags(self, tags):
+        request = self.context.get('request')
+        if not request:
+            raise ValueError('Request must be passed in context')
+        objs = []
+        for tag in tags:
+            obj, _ = Tag.objects.get_or_create(user=request.user, name=tag)
+            objs.append(obj)
+        return objs
+
+    @transaction.atomic
     def create(self, validated_data):
-        try:
-            request = self.context["request"]
-        except KeyError:
-            raise KeyError('Request must be passed in')
+        request = self.context.get('request')
+        if not request:
+            raise ValueError('Request must be passed in context')
         tags = validated_data.pop('tags', None)
         interview = Interview.objects.create(**validated_data, user=request.user)
-        if tags is not None:
-            interview.tags.set(tags)
+        if tags:
+            tag_objs = self._handle_tags(tags)
+            interview.tags.set(tag_objs)
         return interview
 
+    @transaction.atomic
     def update(self, instance, validated_data):
         tags = validated_data.pop('tags', None)
         instance = super().update(instance, validated_data)
         if tags is not None:
-            instance.tags.set(tags)
+            tag_objs = self._handle_tags(tags)
+            instance.tags.set(tag_objs)
         return instance
