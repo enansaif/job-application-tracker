@@ -230,7 +230,7 @@ class InterviewReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Interview
-        fields = ['application', 'tags', 'date', 'note']
+        fields = ['id', 'application', 'tags', 'date', 'note']
 
     def create(self, validated_data):
         raise NotImplementedError('This class is read only')
@@ -251,6 +251,19 @@ class InterviewWriteSerializer(serializers.ModelSerializer):
         model = Interview
         fields = ['user', 'application', 'tags', 'date', 'note']
         read_only_fields = ['user']
+        extra_kwargs = {
+            'application': {'write_only': True},
+            'note': {'required': False, 'allow_blank': True}
+        }
+
+    def validate_application(self, value):
+        """Validate that the application belongs to the current user"""
+        request = self.context.get('request')
+        if not request:
+            raise ValueError('Request must be passed in context')
+        if value.user != request.user:
+            raise serializers.ValidationError('Application does not belong to the current user')
+        return value
 
     def _handle_tags(self, tags):
         request = self.context.get('request')
@@ -279,6 +292,9 @@ class InterviewWriteSerializer(serializers.ModelSerializer):
         tags = validated_data.pop('tags', None)
         instance = super().update(instance, validated_data)
         if tags is not None:
-            tag_objs = self._handle_tags(tags)
-            instance.tags.set(tag_objs)
+            if tags:  # If tags list is not empty
+                tag_objs = self._handle_tags(tags)
+                instance.tags.set(tag_objs)
+            else:  # If tags list is empty, clear all tags
+                instance.tags.clear()
         return instance
