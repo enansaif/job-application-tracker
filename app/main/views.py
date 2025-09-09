@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from core.models import Tag, Country
+from core.models import Tag, Country, Interview
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -209,3 +209,64 @@ class ApplicationCreateView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class InterviewListCreateView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        responses=InterviewReadSerializer(many=True),
+        operation_id="interview_list"
+    )
+    def get(self, request):
+        interviews = Interview.objects.filter(user=request.user)
+        serializer = InterviewReadSerializer(interviews, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        request=InterviewWriteSerializer,
+        responses=InterviewReadSerializer,
+        operation_id="interview_create"
+    )
+    def post(self, request):
+        serializer = InterviewWriteSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            interview = serializer.save()
+            return Response(InterviewReadSerializer(interview).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class InterviewDetailView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        responses=InterviewReadSerializer,
+        operation_id="interview_detail"
+    )
+    def get(self, request, id):
+        interview = get_object_or_404(Interview, id=id, user=request.user)
+        serializer = InterviewReadSerializer(interview)
+        return Response(serializer.data)
+
+    @extend_schema(
+        request=InterviewWriteSerializer,
+        responses=InterviewReadSerializer,
+        operation_id="interview_update"
+    )
+    def patch(self, request, id):
+        interview = get_object_or_404(Interview, id=id, user=request.user)
+        serializer = InterviewWriteSerializer(instance=interview, data=request.data, partial=True, context={'request': request})
+        if serializer.is_valid():
+            interview = serializer.save()
+            return Response(InterviewReadSerializer(interview).data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        operation_id="interview_delete"
+    )
+    def delete(self, request, id):
+        interview = get_object_or_404(Interview, id=id, user=request.user)
+        interview.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

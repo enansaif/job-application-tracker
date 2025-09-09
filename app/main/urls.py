@@ -12,4 +12,6 @@ urlpatterns = [
     path('resume/<int:id>/', views.ResumeDetailView.as_view(), name='resume-update'),
     path('application/', views.ApplicationCreateView.as_view(), name='app-create'),
     path('application/<int:id>/', views.ApplicationDetailView.as_view(), name='app-detail'),
+    path('interview/', views.InterviewListCreateView.as_view(), name='interview-list-create'),
+    path('interview/<int:id>/', views.InterviewDetailView.as_view(), name='interview-detail'),
 ]
